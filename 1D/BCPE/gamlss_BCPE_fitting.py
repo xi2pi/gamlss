@@ -55,8 +55,8 @@ initParams = [40, 0.1, 1, 1.7]
 
 
 
-#results = minimize(LL, initParams, args=x, method='nelder-mead')
-results = minimize(LL, initParams, args=x, method='bfgs')
+results = minimize(LL, initParams, args=x, method='nelder-mead')
+#results = minimize(LL, initParams, args=x, method='bfgs')
 print(results.x)
 
 x_axis= np.arange(35,60,0.1)
