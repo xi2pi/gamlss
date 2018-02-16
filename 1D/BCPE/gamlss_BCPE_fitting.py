@@ -6,7 +6,7 @@ Created on Fri Feb  9 08:20:58 2018
 """
 import matplotlib.pyplot as plt
 from scipy import exp
-from scipy.special import gamma, erf
+#from scipy.special import gamma, erf
 import numpy as np
 import pandas as pd
 #from scipy.optimize import curve_fit
@@ -14,23 +14,6 @@ import pandas as pd
 from scipy.optimize import minimize
 import time
 
-def NO(x,M,S):
-    return 1/(np.sqrt(2*np.pi)*S)*exp(-(x-M)**2/(2*S**2))
-    
-def BCCG(params,x):
-    M = params[0]
-    S = params[1]
-    L = params[2]
-    
-    Phi = 0.5*(1 + erf((1/(S*np.abs(L)))/(np.sqrt(2))))
-    
-    if L == 0:
-        z = (1/S)*np.log(x/M)
-    else:
-        z = (1/(S*L))*(((x/M)**L)-1)
-    
-    f = (x**(L-1)*np.exp(-0.5*z**2))/((M**L)*S*Phi*np.sqrt(2*np.pi))
-    return f
 
 def BCPE(params, x):
     M = params[0]
@@ -52,9 +35,8 @@ def BCPE(params, x):
 def LL(params, x):
     if (params[0]>0 and params[1]>0 and params[3]> 0):
         prob = 0
-        for i in x:
-            prob_i = BCPE(params, i)
-            prob = prob+np.log(prob_i)
+        prob_i = BCPE(params, x)
+        prob = np.sum(np.log(prob_i))
         print(-prob)
         return -prob
     else:
@@ -72,8 +54,7 @@ x = example_data['head'].values
 initParams = [40, 0.1, 1, 1.7]
 
 
-#Gewünschte Werte
-#initParams = [48.33, 0.03432, 0.573, 1.389]
+
 results = minimize(LL, initParams, args=x, method='nelder-mead')
 #results = minimize(LL, initParams, args=x, method='SLSQP')
 print(results.x)
@@ -94,6 +75,10 @@ print(str(end - start)+ " seconds")
 '''
 Results:
 Nelder-Mead kommt auf 4.3 seconds
+# [  4.83366348e+01   3.53230980e-02   7.92914982e-01   1.38759560e+00]
+
+#Gewünschte Werte
+#initParams = [48.33, 0.03432, 0.573, 1.389]
 
 Found this page:
 https://stackoverflow.com/questions/6620471/fitting-empirical-distribution-to-theoretical-ones-with-scipy-python

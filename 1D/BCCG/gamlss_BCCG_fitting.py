@@ -53,9 +53,11 @@ def LL(params, x):
     #if (params[0]>0 and params[1]>0 and params[3]> 0):
     if (params[0]>0 and params[1]>0):
         prob = 0
-        for i in x:
-            prob_i = BCCG(params, i)
-            prob = prob+np.log(prob_i)
+        prob_i = BCCG(params, x)
+        prob = np.sum(np.log(prob_i))
+        #for i in x:
+        #    prob_i = BCCG(params, i)
+        #    prob = prob+np.log(prob_i)
         print(-prob)
         return -prob
     else:

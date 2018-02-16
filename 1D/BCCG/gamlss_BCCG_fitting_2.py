@@ -51,10 +51,9 @@ def BCPE(params, x):
 
 def LL(params, x):
     if (params[0]>0 and params[1]>0):
-        prob = 0
-        for i in x:
-            prob_i = BCCG(params, i)
-            prob = prob+np.log(prob_i)
+        #prob = 0
+        prob_i = BCCG(params, x)
+        prob = np.sum(np.log(prob_i))
         print(-prob)
         return -prob
     else:
@@ -106,6 +105,9 @@ print(str(end - start)+ " seconds")
 '''
 Results:
 2.3 seconds BCCG with init parameters
+
+Update 16.02.18: Tipp by statsmodel author: change "i in x"
+0.46 seconds
 
 Found this page:
 https://stackoverflow.com/questions/6620471/fitting-empirical-distribution-to-theoretical-ones-with-scipy-python
