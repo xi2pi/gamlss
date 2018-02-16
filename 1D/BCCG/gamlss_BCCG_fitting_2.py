@@ -71,7 +71,9 @@ def minimize_LL(x, initParams=None):
     else:
         print(initParams)
         
-    results = minimize(LL, initParams, args=x, method='nelder-mead')
+    #results = minimize(LL, initParams, args=x, method='nelder-mead')
+    results = minimize(LL, initParams, args=x, method='bfgs')
+    #results = minimize(LL, initParams, args=x, method='L-BFGS-B')
     return results
     
 start = time.time()
@@ -104,10 +106,14 @@ print(str(end - start)+ " seconds")
 
 '''
 Results:
-2.3 seconds BCCG with init parameters
+nelder- mead: 2.3 seconds BCCG with init parameters
+[  4.83247539e+01,   3.57880757e-02,   4.21610581e-01]
+
 
 Update 16.02.18: Tipp by statsmodel author: change "i in x"
 0.46 seconds
+
+bfgs: 0.47 seconds; small differences in parameters
 
 Found this page:
 https://stackoverflow.com/questions/6620471/fitting-empirical-distribution-to-theoretical-ones-with-scipy-python

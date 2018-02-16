@@ -6,7 +6,7 @@ Created on Fri Feb  9 08:20:58 2018
 """
 import matplotlib.pyplot as plt
 from scipy import exp
-#from scipy.special import gamma, erf
+from scipy.special import gamma, erf
 import numpy as np
 import pandas as pd
 #from scipy.optimize import curve_fit
@@ -55,8 +55,8 @@ initParams = [40, 0.1, 1, 1.7]
 
 
 
-results = minimize(LL, initParams, args=x, method='nelder-mead')
-#results = minimize(LL, initParams, args=x, method='SLSQP')
+#results = minimize(LL, initParams, args=x, method='nelder-mead')
+results = minimize(LL, initParams, args=x, method='bfgs')
 print(results.x)
 
 x_axis= np.arange(35,60,0.1)
@@ -75,9 +75,15 @@ print(str(end - start)+ " seconds")
 '''
 Results:
 Nelder-Mead kommt auf 4.3 seconds
-# [  4.83366348e+01   3.53230980e-02   7.92914982e-01   1.38759560e+00]
+[  4.83366348e+01   3.53230980e-02   7.92914982e-01   1.38759560e+00]
 
-#Gewünschte Werte
+bfgs gibt falsche parameter
+
+L-BFGS-B ebenfalls falsche parameter
+
+
+
+#Gewünschte Werte (aus R/gamlss)
 #initParams = [48.33, 0.03432, 0.573, 1.389]
 
 Found this page:
