@@ -17,5 +17,7 @@ script here: [code](1D/BCPE/gamlss_BCPE_fitting.py)
 # 2D fitting
 Currently, I am still working at the implementation of 2D fitting.
 Following graph shows the fitting results in gamlss/R:
-[gamlss 2D](2D/BCPE/Rplot_BCPE_2D.png)
-[code](2D/BCPE/percentiles_BCPE.R)
+
+![gamlss 2D](2D/BCPE/Rplot_BCPE_2D.png)
+
+script here: [code](2D/BCPE/percentiles_BCPE.R)
