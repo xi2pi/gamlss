@@ -197,8 +197,7 @@ while diff_LL>0.1:
         M_update = np.dot(G_M,(u_M+np.dot(W_M,M_0)-np.dot(W_MS, (S-S_0))-np.dot(W_ML, (L-L_0))))
         S_update = np.dot(G_S,(u_S+np.dot(W_S,S_0)-np.dot(W_SL, (L-L_0))-np.dot(W_SM, (M-M_0))))
                 
-        # I think, here is a mistake. For some reason it does not converge. Maybe I misunderstood this step
-                
+       
         # plotting the updated values L
         plt.plot(x_LMS,M, 'r', label = "M old")
         plt.plot(x_LMS,M_update, label = "M")
