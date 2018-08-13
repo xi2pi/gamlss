@@ -64,9 +64,9 @@ def comp_centile(x_LMS, L, M, S, p = 2):
     centile = np.zeros(len(x_LMS))
     for i in range(0, len(x_LMS)):
         if L[i] == 0:
-            centile[i] = M[i]*(1+L[i]*S[i]*p)**(1/L[i])
+            centile[i] = M[i]*np.exp(S[i]*p)
         else:
-            centile[i] = M[i]*np.exp(S[i]*p)  
+            centile[i] = M[i]*(1+L[i]*S[i]*p)**(1/L[i])  
     return centile
   
 #compute the loglikelihood function  
@@ -108,7 +108,7 @@ x_LMS = np.linspace(min(x), max(x), len(x))
 
 # predefine smoothing parameters alpha
 alpha_M = len(x)*((max(x) - min(x))**3 /(400 * (max(y) - min(y))**2)) * 0.2
-alpha_S = 2 * alpha_M * np.mean(x) * 100
+alpha_S = 2 * alpha_M * np.mean(x) * 1000
 alpha_L = np.std(x)**4 * alpha_S
 
 
@@ -254,11 +254,11 @@ plt.plot(x,y, '.')
 plt.legend()
 plt.show()
 
-plt.plot(x_LMS, S_update, label = "S")
+plt.plot(x_LMS, S, label = "S")
 plt.legend()
 plt.show()
 
-plt.plot(x_LMS, L_update, label = "L")
+plt.plot(x_LMS, L, label = "L")
 plt.legend()
 plt.show()
 
