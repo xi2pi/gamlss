@@ -44,18 +44,20 @@ def def_K(x):
     
 
 # initialize L0, M0 and S0    
-def init_LMS_0(x):
+def init_LMS_0(x, y):
+    poly_M = np.polyfit(x,y,1)
     len_x = len(x)
     L = np.ones(len_x) * 0.9
-    M = np.ones(len_x) * 150
+    M = x * poly_M[0] + poly_M[1]
     S = np.ones(len_x) * 0.8
     return [L, M, S]
  
 # initialize L, M and S       
-def init_LMS(x):
+def init_LMS(x, y):
+    poly_M = np.polyfit(x,y,1)
     len_x = len(x)
     L = np.ones(len_x) * 1
-    M = np.ones(len_x) * 160
+    M = x * poly_M[0] + poly_M[1]
     S = np.ones(len_x) * 0.9
 
     return [L, M, S]
@@ -94,14 +96,17 @@ Start
 '''
 
 # Data
-data = pd.read_csv("example_data.csv")
-
-x = data["age"].values
-#y = data["head"].values + np.linspace(50, 150, len(data["head"].values))
-y = data["head"].values + 100
+#data = pd.read_csv("example_data.csv")
+data = pd.read_csv("test_data_abdom.csv")
+x = data["x"].values
+y = data["y"].values
+#x = data["age"].values
+##y = data["head"].values + np.linspace(50, 150, len(data["head"].values))
+#y = data["head"].values + 100
 
 # resampling the x vector 
 x_LMS = np.linspace(min(x), max(x), len(x))
+d_x = x_LMS[1] - x_LMS[0]
 
 
 ''' LMS method by Cole 1992 '''
@@ -111,11 +116,16 @@ alpha_M = len(x)*((max(x) - min(x))**3 /(400 * (max(y) - min(y))**2)) * 0.2
 alpha_S = 2 * alpha_M * np.mean(x) * 1000
 alpha_L = np.std(x)**4 * alpha_S
 
+# degree of freedom
+edf_M = 2
+edf_S = 2
+edf_L = 2
+
 
 K = def_K(x_LMS)
 
-L_0,M_0,S_0 = init_LMS_0(x_LMS)
-L,M,S = init_LMS(x_LMS)
+L_0,M_0,S_0 = init_LMS_0(x_LMS, y)
+L,M,S = init_LMS(x_LMS, y)
 
 # compute loglikelihood function
 LL_0 = comp_LL(L, M, S, alpha_L, alpha_M, alpha_S, K, y, x, x_LMS)
@@ -124,7 +134,7 @@ diff_LL = 1 # percent
 
 
 # outer loop
-while diff_LL>0.1:
+while diff_LL>0.01:
         
     diff_parameter = 100 # percent
     
@@ -148,13 +158,12 @@ while diff_LL>0.1:
         
         # for each i the according data points (x,y) have to be found
         # if there are more than one, they are added up 
-        x_ind = np.where(((0.01+ x_LMS[i] >= x) & (x_LMS[i] <= x)))[0]
+        x_ind = np.where(((d_x + x_LMS[i] >= x) & (x_LMS[i] <= x)))[0]
         u_L[i] = np.sum((z[x_ind]/L[i])*(z[x_ind]-np.log(y[x_ind]/M[i])/S[i]) - (np.log(y[x_ind]/M[i])*(z[x_ind]**2 - 1)))
         u_M[i] = np.sum(z[x_ind] / (M[i] * S[i]) + L[i] * (z[x_ind]**2 - 1) / M[i])
         u_S[i] = np.sum((z[x_ind]**2-1)/S[i])
     
         len_x_ind = len(x_ind)
-        #len_x_ind = 1
         
         # same for the matrices W 
         if len_x_ind == 0:
@@ -186,8 +195,11 @@ while diff_LL>0.1:
     
     # inner loop
     while diff_parameter>10:
+        print("inner loop - next iteration step")
         
         ''' equation (9) in Cole (1992)'''
+        
+        #alpha_L = ...
         
         G_L = np.linalg.inv(W_L+alpha_L*K)
         G_M = np.linalg.inv(W_M+alpha_M*K)
@@ -199,20 +211,21 @@ while diff_LL>0.1:
                 
        
         # plotting the updated values L
-        plt.plot(x_LMS,M, 'r', label = "M old")
-        plt.plot(x_LMS,M_update, label = "M")
-        plt.plot(x,y, '.')
-        
-        plt.legend()
-        plt.show()
-        
-        plt.plot(x_LMS, S, label = "S old")
-        plt.plot(x_LMS, S_update, label = "S")
-        plt.plot(x_LMS, L, label = "L old")
-        plt.plot(x_LMS, L_update, label = "L")
-        
-        plt.legend()
-        plt.show()
+#        plt.plot(x_LMS,M, 'r', label = "M old")
+#        plt.plot(x_LMS,M_update, label = "M")
+#        plt.plot(x,y, '.')
+#        
+#        plt.legend()
+#        plt.show()
+#        
+#        plt.plot(x_LMS, S, label = "S old")
+#        plt.plot(x_LMS, S_update, label = "S")
+#        plt.plot(x_LMS, L, label = "L old")
+#        plt.plot(x_LMS, L_update, label = "L")
+#        
+#        plt.legend()
+#        plt.show()
+
         
         
         diff_parameter = np.sum(np.abs((M-M_update)/M_update))
@@ -226,11 +239,26 @@ while diff_LL>0.1:
 #        print(min(S))
         
         print(diff_parameter)
-        print("inner loop - next iteration step")
+        
     
     # problem: inner loop does not converge
     # diff_LL = 0.001
     print("inner loop - done")
+    
+    plt.plot(x_LMS,comp_centile(x_LMS, L, M, S, p = 2), label = "z-score: " + str(2))
+    plt.plot(x_LMS,comp_centile(x_LMS, L, M, S, p = 1), label = "z-score: " + str(1))
+    plt.plot(x_LMS,comp_centile(x_LMS, L, M, S, p = 0.5), label = "z-score: " + str(0.5))
+    plt.plot(x_LMS,comp_centile(x_LMS, L, M, S, p = 0), label = "z-score: " + str(0))
+    plt.plot(x_LMS,comp_centile(x_LMS, L, M, S, p = -0.5), label = "z-score: " + str(-0.5))
+    plt.plot(x_LMS,comp_centile(x_LMS, L, M, S, p = -1), label = "z-score: " + str(-1))
+    plt.plot(x_LMS,comp_centile(x_LMS, L, M, S, p = -2), label = "z-score: " + str(-2))
+    plt.plot(x,y, '.')
+    
+    plt.legend()
+   # plt.savefig("fig/fig"+str(diff_LL)+".png")
+    plt.show()
+    
+    
     LL_calc = comp_LL(L, M, S, alpha_L, alpha_M, alpha_S, K, y, x, x_LMS)
     diff_LL = np.abs((LL_0-LL_calc)/LL_calc)
     
@@ -241,11 +269,19 @@ while diff_LL>0.1:
     LL_0 = LL_calc
     print("LogLikelihood: " + str(diff_LL))
     
+edf_L = np.trace(np.dot(G_L, W_L))
+edf_S = np.trace(np.dot(G_S, W_S))
+edf_M = np.trace(np.dot(G_M, W_M))
 
-plt.plot(x_LMS,M, label = "M")
+print("edf:")
+print(edf_L)
+print(edf_S)
+print(edf_M)
+
 plt.plot(x_LMS,comp_centile(x_LMS, L, M, S, p = 2), label = "z-score: " + str(2))
 plt.plot(x_LMS,comp_centile(x_LMS, L, M, S, p = 1), label = "z-score: " + str(1))
 plt.plot(x_LMS,comp_centile(x_LMS, L, M, S, p = 0.5), label = "z-score: " + str(0.5))
+plt.plot(x_LMS,comp_centile(x_LMS, L, M, S, p = 0), label = "z-score: " + str(0))
 plt.plot(x_LMS,comp_centile(x_LMS, L, M, S, p = -0.5), label = "z-score: " + str(-0.5))
 plt.plot(x_LMS,comp_centile(x_LMS, L, M, S, p = -1), label = "z-score: " + str(-1))
 plt.plot(x_LMS,comp_centile(x_LMS, L, M, S, p = -2), label = "z-score: " + str(-2))
